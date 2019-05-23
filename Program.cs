@@ -1,8 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 
 namespace DeSmuME_Resizer {
@@ -28,31 +31,27 @@ namespace DeSmuME_Resizer {
 		private const int SWP_NOMOVE = 0x0002;
 		private const int SWP_NOSIZE = 0x0001;
 		#endregion
-		#region Constants
 		const string SETTINGS_FILE = "DeSmuME Resizer.ini";
-		#endregion
+		static string[] SETTINGS = File.Exists(SETTINGS_FILE) ? File.ReadAllLines(SETTINGS_FILE, Encoding.UTF8) : null;
 
 		static void Main(string[] args) {
 
-			int Height = 0;
-			if (File.Exists(SETTINGS_FILE)) {
-				Console.WriteLine("Using previous resolution, to use a new one delete DeSmuME Resizer.ini or change it in that file.");
-				Height = int.Parse(File.ReadAllText(SETTINGS_FILE, Encoding.UTF8).Split('=')[1]);
-			} else {
-				Console.WriteLine("Which resolution do you want (e.g. 720, 1080, 1440, e.t.c):");
-				Height = int.Parse(Console.ReadLine().ToLowerInvariant().Replace("p", string.Empty));
-				File.WriteAllText(SETTINGS_FILE, "SavedResolution=" + Height);
-			}
-			int Width = Height / 9 * 16 * 2;
+			#region Get Calculations
+			int[] AspectRatio = GetSetting<string>("AspectRatio").Split(':').Select(int.Parse).ToArray();
+			int Screens = GetSetting<int>("Screens", SettingsFlags.NumericOnly);
+			int Height = GetSetting<int>("Resolution", SettingsFlags.NumericOnly);
+			int Width = Height / AspectRatio[1] * AspectRatio[0] * Screens;
+			#endregion
 			#region Run DeSmuME.exe
 			Process p = new Process() {
 				StartInfo = new ProcessStartInfo() {
-					FileName = "DeSmuME.exe"
+					FileName = @"C:\Program Files\DeSmuME\DeSmuME.exe"
 				}
 			};
 			p.Start();
 			p.WaitForInputIdle();
 			#endregion
+			#region Do Resize
 			while (true) {
 				Console.WriteLine("Starting Resize");
 				IntPtr handle = p.MainWindowHandle;
@@ -89,7 +88,57 @@ namespace DeSmuME_Resizer {
 				Console.WriteLine("Something isn't quite right, everything went succesful except for the verification of the resulting window bounds, retrying in 2 seconds...");
 				Thread.Sleep(2000);
 			}
+			#endregion
 
 		}
+
+		[Flags]
+		enum SettingsFlags {
+			None,
+			NumericOnly,
+			AlphaOnly,
+			AlphaNumericOnly,
+			Lowercase
+		}
+		static T GetSetting<T>(string Setting, SettingsFlags Flags = SettingsFlags.None) {
+			if (SETTINGS != null) {
+				IEnumerable<string> KeysMatched = SETTINGS.Where(x => x.StartsWith(Setting + "="));
+				if (KeysMatched != null && KeysMatched.Any()) {
+					return (T)Convert.ChangeType(KeysMatched.First().Split('=')[1], typeof(T));
+				}
+			}
+			string Message = string.Empty;
+			switch (Setting) {
+				case "AspectRatio":
+				Message = "Which aspect ratio do you want (e.g. 4:3, 16:9, 21:9, e.t.c)";
+				break;
+				case "Screens":
+				Message = "How many Screens is DeSmuME set up to show? (1/2)";
+				break;
+				case "Resolution":
+				Message = "Which resolution do you want (e.g. 720, 1080, 1440, e.t.c)";
+				break;
+				default:
+				Message = "ERROR OCCURED!";
+				break;
+			}
+			Console.WriteLine(Message + ":");
+			string Answer = Console.ReadLine();
+			if (Flags.HasFlag(SettingsFlags.NumericOnly)) {
+				Regex.Replace(Answer, "[^0-9]", string.Empty);
+			}
+			if (Flags.HasFlag(SettingsFlags.AlphaOnly)) {
+				Regex.Replace(Answer, "[^a-zA-Z]", string.Empty);
+			}
+			if (Flags.HasFlag(SettingsFlags.AlphaNumericOnly)) {
+				Regex.Replace(Answer, "[^a-zA-Z0-9]", string.Empty);
+			}
+			if (Flags.HasFlag(SettingsFlags.Lowercase)) {
+				Answer = Answer.ToLowerInvariant();
+			}
+			File.AppendAllText(SETTINGS_FILE, Setting + "=" + Answer + "\n");
+			return (T)Convert.ChangeType(Answer, typeof(T));
+		}
+
 	}
 }
