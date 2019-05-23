@@ -31,7 +31,8 @@ namespace DeSmuME_Resizer {
 		private const int SWP_NOMOVE = 0x0002;
 		private const int SWP_NOSIZE = 0x0001;
 		#endregion
-		const string SETTINGS_FILE = "DeSmuME Resizer.ini";
+		static string LOCATEME = Path.GetDirectoryName(System.Reflection.Assembly.GetEntryAssembly().Location);
+		static string SETTINGS_FILE = Path.Combine(LOCATEME, "DeSmuME Resizer.ini");
 		static string[] SETTINGS = File.Exists(SETTINGS_FILE) ? File.ReadAllLines(SETTINGS_FILE, Encoding.UTF8) : null;
 
 		static void Main(string[] args) {
@@ -45,7 +46,8 @@ namespace DeSmuME_Resizer {
 			#region Run DeSmuME.exe
 			Process p = new Process() {
 				StartInfo = new ProcessStartInfo() {
-					FileName = @"DeSmuME.exe"
+					FileName = Path.Combine(LOCATEME, "DeSmuME.exe"),
+					Arguments = args.Length != 0 ? "\"" + args[0] + "\"" : string.Empty
 				}
 			};
 			p.Start();
