@@ -45,7 +45,7 @@ namespace DeSmuME_Resizer {
 			#region Run DeSmuME.exe
 			Process p = new Process() {
 				StartInfo = new ProcessStartInfo() {
-					FileName = @"C:\Program Files\DeSmuME\DeSmuME.exe"
+					FileName = @"DeSmuME.exe"
 				}
 			};
 			p.Start();
