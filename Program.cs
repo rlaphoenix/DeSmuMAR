@@ -127,13 +127,13 @@ namespace DeSmuME_Resizer {
 			Console.WriteLine(Message + ":");
 			string Answer = Console.ReadLine();
 			if (Flags.HasFlag(SettingsFlags.NumericOnly)) {
-				Regex.Replace(Answer, "[^0-9]", string.Empty);
+				Answer = Regex.Replace(Answer, "[^0-9]", string.Empty);
 			}
 			if (Flags.HasFlag(SettingsFlags.AlphaOnly)) {
-				Regex.Replace(Answer, "[^a-zA-Z]", string.Empty);
+				Answer = Regex.Replace(Answer, "[^a-zA-Z]", string.Empty);
 			}
 			if (Flags.HasFlag(SettingsFlags.AlphaNumericOnly)) {
-				Regex.Replace(Answer, "[^a-zA-Z0-9]", string.Empty);
+				Answer = Regex.Replace(Answer, "[^a-zA-Z0-9]", string.Empty);
 			}
 			if (Flags.HasFlag(SettingsFlags.Lowercase)) {
 				Answer = Answer.ToLowerInvariant();
