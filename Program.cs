@@ -8,7 +8,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 
-namespace DeSmuME_Resizer {
+namespace DeSmuMAR {
 	class Program {
 
 		#region API's and Structs
@@ -32,7 +32,7 @@ namespace DeSmuME_Resizer {
 		private const int SWP_NOSIZE = 0x0001;
 		#endregion
 		static string LOCATEME = Path.GetDirectoryName(System.Reflection.Assembly.GetEntryAssembly().Location);
-		static string SETTINGS_FILE = Path.Combine(LOCATEME, "DeSmuME Resizer.ini");
+		static string SETTINGS_FILE = Path.Combine(LOCATEME, "DeSmuMAR.ini");
 		static string[] SETTINGS = File.Exists(SETTINGS_FILE) ? File.ReadAllLines(SETTINGS_FILE, Encoding.UTF8) : null;
 
 		static void Main(string[] args) {

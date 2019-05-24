@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("DeSmuME Resizer")]
-[assembly: AssemblyDescription("An automated aspect ratio based resizing method for DeSmuME.")]
+[assembly: AssemblyTitle("DeSmuMAR")]
+[assembly: AssemblyDescription("An automated aspect ratio based resizing method for DeSmuME for playing in specific Aspect Ratio's.")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("DeSmuME Resizer")]
+[assembly: AssemblyProduct("DeSmuMAR")]
 [assembly: AssemblyCopyright("Copyright © PRAGMA 2019")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -33,4 +33,4 @@ using System.Runtime.InteropServices;
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
 [assembly: AssemblyVersion("1.0.0.0")]
-[assembly: AssemblyFileVersion("1.4.1.0")]
+[assembly: AssemblyFileVersion("1.4.2.0")]
