@@ -35,8 +35,9 @@ namespace DeSmuMAR {
 		#endregion
 		static string LOCATEME = Path.GetDirectoryName(System.Reflection.Assembly.GetEntryAssembly().Location);
 		static string SETTINGS_FILE = Path.Combine(LOCATEME, "DeSmuMAR.ini");
-		static bool SETTINGS_FORCE_OVERWRITE = false;
+		static string DESMUME_LOCATION = Path.Combine(LOCATEME, "DeSmuME.exe");
 		static string DESMUME_SETTINGS_FILE = Path.Combine(LOCATEME, "desmume.ini");
+		static bool SETTINGS_FORCE_OVERWRITE = false;
 		static string[] SETTINGS = File.Exists(SETTINGS_FILE) ? File.ReadAllLines(SETTINGS_FILE, Encoding.UTF8) : null;
 		static string ARGUMENT = null;
 
@@ -45,7 +46,7 @@ namespace DeSmuMAR {
 			ARGUMENT = args.Length != 0 ? "\"" + args[0] + "\"" : string.Empty;
 
 			#region Check for DeSmuME
-			if (!File.Exists("DeSmuME.exe")) {
+			if (!File.Exists(DESMUME_LOCATION)) {
 				Log("DeSmuME isn't next to DeSmuMAR, do you want DeSmuMAR to automatically download the latest DeSmuME DEV Build from 'appveyor.com/project/zeromus/desmume'? (y/n)");
 				if(Console.ReadKey().Key == ConsoleKey.Y) {
 					Console.Write("\nFetching Latest Job ID...");
@@ -55,7 +56,7 @@ namespace DeSmuMAR {
 						Thread.Sleep(5000);
 					} else {
 						Console.Write(" DONE! " + LatestJobID.Groups[1].Value + "\nDownloading \"DeSmuME-VS2015-x64-Release.exe\"......");
-						new WebClient().DownloadFile("https://ci.appveyor.com/api/buildjobs/" + LatestJobID.Groups[1].Value + "/artifacts/desmume/src/frontend/windows/__bins/DeSmuME-VS2015-x64-Release.exe", "DeSmuME.exe");
+						new WebClient().DownloadFile("https://ci.appveyor.com/api/buildjobs/" + LatestJobID.Groups[1].Value + "/artifacts/desmume/src/frontend/windows/__bins/DeSmuME-VS2015-x64-Release.exe", DESMUME_LOCATION);
 						Log("DONE! Downloaded DeSmuME! Restarting DeSmuMAR in 5 seconds...");
 						Thread.Sleep(5000);
 						Process.Start(LOCATEME, ARGUMENT);
@@ -127,7 +128,7 @@ namespace DeSmuMAR {
 			#region Run DeSmuME.exe
 			Process p = new Process() {
 				StartInfo = new ProcessStartInfo() {
-					FileName = Path.Combine(LOCATEME, "DeSmuME.exe"),
+					FileName = DESMUME_LOCATION,
 					Arguments = ARGUMENT
 				}
 			};
