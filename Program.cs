@@ -46,24 +46,7 @@ namespace DeSmuMAR {
 			ARGUMENT = args.Length != 0 ? "\"" + args[0] + "\"" : string.Empty;
 
 			#region Check for DeSmuME
-			if (!File.Exists(DESMUME_LOCATION)) {
-				Log("DeSmuME isn't next to DeSmuMAR, do you want DeSmuMAR to automatically download the latest DeSmuME DEV Build from 'ci.appveyor.com/project/zeromus/desmume'? (y/n)");
-				if(Console.ReadKey().Key == ConsoleKey.Y) {
-					Console.Write("\nFetching Latest Job ID...");
-					Match LatestJobID = Regex.Match(new WebClient() { Headers = { { "Accept", "application/json" } } }.DownloadString("https://ci.appveyor.com/api/projects/zeromus/desmume"), "\"jobId\":\"([^\"]*)\",\"name\":\"Platform: x64\"");
-					if(!LatestJobID.Success) {
-						Log("FAILED! The response from AppVeyor was unexpected. Closing DeSmuMAR in 5 seconds...", LogTypes.Error);
-						Thread.Sleep(5000);
-					} else {
-						Console.Write(" DONE! " + LatestJobID.Groups[1].Value + "\nDownloading \"DeSmuME-VS2019-x64-Release.exe\"......");
-						new WebClient().DownloadFile("https://ci.appveyor.com/api/buildjobs/" + LatestJobID.Groups[1].Value + "/artifacts/desmume/src/frontend/windows/__bins/DeSmuME-VS2019-x64-Release.exe", DESMUME_LOCATION);
-						Log("DONE! Downloaded DeSmuME! Restarting DeSmuMAR in 5 seconds...");
-						Thread.Sleep(5000);
-						Process.Start(LOCATEME, ARGUMENT);
-					}
-					Environment.Exit(0);
-				}
-			}
+			GetDesmume();
 			#endregion
 			#region Get Calculations
 			bool WidthSafe = false;
@@ -136,6 +119,34 @@ namespace DeSmuMAR {
 			p.WaitForInputIdle();
 			#endregion
 
+		}
+		
+		private static void GetDesmume() {
+			if (File.Exists(DesmumeLocation)) return;
+			
+			Log(
+				"DeSmuME isn't next to DeSmuMAR, do you want DeSmuMAR to automatically download the " +
+				"latest DeSmuME DEV Build from the AppVeyor CI? (y/n)"
+			);
+			if (Console.ReadKey().Key != ConsoleKey.Y) return;
+			
+			Console.Write("\nFetching DeSmuME AppVeyor CI Status...");
+			var appveyorApi = new WebClient {Headers = {{"Accept", "application/json"}}}
+				.DownloadString("https://ci.appveyor.com/api/projects/zeromus/desmume");
+
+			Console.Write("\nFetching Latest Job ID...");
+			var latestJobId = Regex.Match(appveyorApi, "\"jobId\":\"([^\"]*)");
+			if (!latestJobId.Success) {
+				Log("FAILED! The response from AppVeyor was unexpected. Closing DeSmuMAR in 5 seconds...", LogTypes.Error);
+				Thread.Sleep(5000);
+			} else {
+				Console.Write(" DONE! " + latestJobId.Groups[1].Value + "\nDownloading \"DeSmuME-VS2019-x64-Release.exe\"......");
+				new WebClient().DownloadFile("https://ci.appveyor.com/api/buildjobs/" + latestJobId.Groups[1].Value + "/artifacts/desmume/src/frontend/windows/__bins/DeSmuME-VS2019-x64-Release.exe", DesmumeLocation);
+				Log("DONE! Downloaded DeSmuME! Restarting DeSmuMAR in 5 seconds...");
+				Thread.Sleep(5000);
+				Process.Start(LocateMe, _argument);
+			}
+			Environment.Exit(0);
 		}
 		
 		enum LogTypes {
