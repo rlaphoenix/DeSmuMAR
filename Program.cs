@@ -7,13 +7,15 @@ using System.Net;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading;
 using System.Windows;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace DeSmuMAR {
 	class Program {
 
 		#region API's and Structs
+
 		[StructLayout(LayoutKind.Sequential)]
 		public struct RECT {
 			public int left;
@@ -21,81 +23,63 @@ namespace DeSmuMAR {
 			public int right;
 			public int bottom;
 		}
+
 		[DllImport("user32.dll", SetLastError = true)]
 		static extern bool GetWindowRect(IntPtr hWnd, ref RECT Rect);
 
 		[DllImport("user32.dll", SetLastError = true)]
 		static extern bool MoveWindow(IntPtr hWnd, int X, int Y, int Width, int Height, bool Repaint);
+
 		[DllImport("user32.dll", SetLastError = true)]
 		[return: MarshalAs(UnmanagedType.Bool)]
 		private static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int x, int y, int cx, int cy, int uFlags);
+
 		private const int HWND_TOPMOST = -1;
 		private const int SWP_NOMOVE = 0x0002;
 		private const int SWP_NOSIZE = 0x0001;
+
 		#endregion
-		static string LOCATEME = Path.GetDirectoryName(System.Reflection.Assembly.GetEntryAssembly().Location);
-		static string SETTINGS_FILE = Path.Combine(LOCATEME, "DeSmuMAR.ini");
-		static string DESMUME_LOCATION = Path.Combine(LOCATEME, "DeSmuME.exe");
-		static string DESMUME_SETTINGS_FILE = Path.Combine(LOCATEME, "desmume.ini");
-		static bool SETTINGS_FORCE_OVERWRITE = false;
-		static string[] SETTINGS = File.Exists(SETTINGS_FILE) ? File.ReadAllLines(SETTINGS_FILE, Encoding.UTF8) : null;
-		static string ARGUMENT = null;
+
+		private static readonly string Home = Path.GetDirectoryName(System.Reflection.Assembly.GetEntryAssembly().Location);
+		private static readonly string DemumarSettingsFile = Path.Combine(Home, "DeSmuMAR.ini");
+		private static readonly string DesmumeLocation = Path.Combine(Home, "DeSmuME.exe");
+		private static readonly string DesmumeSettingsFile = Path.Combine(Home, "desmume.ini");
+
+		private static string[] Settings => File.Exists(DemumarSettingsFile) ? File.ReadAllLines(DemumarSettingsFile, Encoding.UTF8) : null;
 
 		static void Main(string[] args) {
 
-			ARGUMENT = args.Length != 0 ? "\"" + args[0] + "\"" : string.Empty;
+			// Ensure DeSmuME is available
+			if (!File.Exists(DesmumeLocation)) {
+				Log("There's no \"DeSmuME.exe\" next to DeSmuMAR, want to automatically download the latest Dev build? (y/n)");
+                if (Console.ReadKey().Key != ConsoleKey.Y) {
+                    Log(
+                        "Alright, feel free to download it yourself. Make sure it's a recent Dev build (not stable!) " +
+                        "due to some features and abilities being missing in the stable builds. If you want a really " +
+                        "nice experience with different aspect ratio's, then take my warning!"
+                    );
+                    return;
+                } else {
+                    if (!DownloadDesmumeDev(DesmumeLocation)) {
+						Log("Failed to download DeSmuME, closing DeSmuMAR...", LogTypes.Error);
+						return;
+                    } else {
+						Log("Downloaded DeSmuME and placed it to \"" + DesmumeLocation + "\".");
+					}
+                }
+            }
 
-			#region Check for DeSmuME
-			GetDesmume();
-			#endregion
-			#region Get Calculations
-			bool WidthSafe = false;
-			bool HeightSafe = false;
-			int LCDLayout = 1;
-			int Width = -1;
-			int Height = -1;
-			while (!WidthSafe && !HeightSafe) {
-				string _ar = string.Empty;
-				bool _ar_baddata = false;
-				while (!(_ar = GetSetting<string>("AspectRatio")).Contains(":") || !_ar.Replace(":", string.Empty).All(char.IsDigit)) {
-					SETTINGS_FORCE_OVERWRITE = true;
-					_ar_baddata = true;
-					Log("Incorrect Ratio Value, are you missing digits or ':'?", LogTypes.Warning);
-				}
-				if(_ar_baddata) {
-					SETTINGS_FORCE_OVERWRITE = false;
-				}
-				int[] AspectRatio = _ar.Split(':').Select(int.Parse).ToArray();
-				bool BothScreens = GetSetting<bool>("Screens", SettingsFlags.BoolOnly);
-				LCDLayout = BothScreens ? 1 : 2;
-				Height = GetSetting<int>("Resolution", SettingsFlags.NumericOnly);
-				Width = Height / AspectRatio[1] * AspectRatio[0] * (LCDLayout == 1 ? 2 : 1);
-				WidthSafe = Width < SystemParameters.VirtualScreenWidth;
-				HeightSafe = Height < SystemParameters.VirtualScreenHeight;
-				if (!WidthSafe || !HeightSafe) {
-					Log(
-						"Oh no! That combination you chose would result in a DeSmuME window that is bigger than your display.\n" +
-						"To reduce the size, you can either reduce the resolution or use a smaller aspect ratio (or both :D)\n" +
-						((SystemParameters.VirtualScreenWidth / SystemParameters.VirtualScreenHeight) == (Width / Height) ? "Since you are trying to use the same aspect ratio for DeSmuME as your Screen, i'm assuming you want to go fullscreen, if this is the case, you should lower the resolution or set the screens amount to \"One LCD\" in DeSmuME as that will help lower the window size.\n" : string.Empty) +
-						"If your curious, you tried to resize DeSmuME to " + Width + "x" + Height + "\n" +
-						"That size is: " +
-						(!WidthSafe ? (Width - SystemParameters.VirtualScreenWidth).ToString() + " pixels wider" : string.Empty) +
-						(!WidthSafe && !HeightSafe ? " & " : string.Empty) +
-						(!HeightSafe ? (Height - SystemParameters.VirtualScreenHeight).ToString() + " pixels taller" : string.Empty) +
-						" than your display :O"
-					, LogTypes.Warning);
-					SETTINGS_FORCE_OVERWRITE = true;
-				}
+			// Ensure the aspect ratio set won't escape the size constraints of the display
+			(int Width, int Height, int LCDLayout) = EnsureSizeConstraint(
+				(int)SystemParameters.VirtualScreenWidth, (int)SystemParameters.VirtualScreenHeight
+			);
+
+			// Force some DeSmuME settings that are necessary for custom aspect ratio use
+			if (!File.Exists(DesmumeSettingsFile)) {
+				Log("Opening DeSmuME just for a second for it to create a default configuration file...");
+				RunDesmume().Kill();
 			}
-			SETTINGS_FORCE_OVERWRITE = false;
-			Log("Chunking some numbers...");
-			#endregion
-			#region Force some DeSmuME Settings
-			if (!File.Exists(DESMUME_SETTINGS_FILE)) {
-				// This is simply a default INI Created by DeSmuME thats necessary.
-				File.WriteAllText(DESMUME_SETTINGS_FILE, Encoding.UTF8.GetString(Convert.FromBase64String("WzNEXQpSZW5kZXJlcj0yCltWaWRlb10KV2luZG93IFJvdGF0ZT0wCkZpbHRlcj0wCldpZHRoPTI1NgpIZWlnaHQ9Mzg0CldpbmRvdyBTaXplPTAKV2luZG93IHdpZHRoPTI1NgpXaW5kb3cgaGVpZ2h0PTM4NApXaW5kb3dQb3NYPTc4CldpbmRvd1Bvc1k9NzgKW0Rpc3BsYXldCkZyYW1lQ291bnRlcj0wClNjcmVlbkdhcD0wCltSYW1XYXRjaF0KU2F2ZVdpbmRvd1Bvcz0wClJXV2luZG93UG9zWD0wClJXV2luZG93UG9zWT0wCkF1dG8tbG9hZD0wCltXYXRjaGVzXQpSZWNlbnQgV2F0Y2ggMT0KUmVjZW50IFdhdGNoIDI9ClJlY2VudCBXYXRjaCAzPQpSZWNlbnQgV2F0Y2ggND0KUmVjZW50IFdhdGNoIDU9CltTY3JpcHRpbmddClJlY2VudCBMdWEgU2NyaXB0IDE9ClJlY2VudCBMdWEgU2NyaXB0IDI9ClJlY2VudCBMdWEgU2NyaXB0IDM9ClJlY2VudCBMdWEgU2NyaXB0IDQ9ClJlY2VudCBMdWEgU2NyaXB0IDU9ClJlY2VudCBMdWEgU2NyaXB0IDY9ClJlY2VudCBMdWEgU2NyaXB0IDc9ClJlY2VudCBMdWEgU2NyaXB0IDg9ClJlY2VudCBMdWEgU2NyaXB0IDk9ClJlY2VudCBMdWEgU2NyaXB0IDEwPQpSZWNlbnQgTHVhIFNjcmlwdCAxMT0KUmVjZW50IEx1YSBTY3JpcHQgMTI9ClJlY2VudCBMdWEgU2NyaXB0IDEzPQpSZWNlbnQgTHVhIFNjcmlwdCAxND0KUmVjZW50IEx1YSBTY3JpcHQgMTU9CltTb3VuZF0KVm9sdW1lPTEwMApbQ29uc29sZV0KUG9zWD01MgpQb3NZPTUyCldpZHRoPTEyMzMKSGVpZ2h0PTUxOQo=")));
-			}
-			UpdateINI(DESMUME_SETTINGS_FILE, new string[][] {
+			UpdateINI(DesmumeSettingsFile, new string[][] {
 				new string[] {"3D", "Renderer", "2"},
 				new string[] {"Console", "Show", "0"},
 				new string[] {"Display", "Show Toolbar", "0"},
@@ -107,47 +91,102 @@ namespace DeSmuMAR {
 				new string[] {"Video", "Window width", Width.ToString()},
 				new string[] {"Video", "Window height", Height.ToString()}
 			});
-			#endregion
-			#region Run DeSmuME.exe
+
+			// Run DeSmuME with the first argument provided to DeSmuMAR (if available, this should be the ROM path)
+			RunDesmume(args.Length > 0 ? "\"" + args[0] + "\"" : null);
+
+		}
+
+		private static bool DownloadDesmumeDev(string savePath) {
+
+			Log("Fetching Status of AppVeyor zeromus/desmume...");
+            string appveyorRes;
+            try {
+				appveyorRes = new WebClient { Headers = { { "Accept", "application/json" } } }
+					.DownloadString("https://ci.appveyor.com/api/projects/zeromus/desmume");
+				if (string.IsNullOrEmpty(appveyorRes)) {
+					Log("The response from AppVeyor was empty or failed to be read.", LogTypes.Error);
+					return false;
+				}
+			} catch (WebException e) {
+				Log("A download error occured: " + e.Message, LogTypes.Error);
+				return false;
+			}
+
+			Log("Reading response as JSON...");
+			JObject appveyor;
+			try {
+				appveyor = JObject.Parse(appveyorRes);
+			} catch (JsonReaderException) {
+				Log("The response from AppVeyor was empty or corrupted.", LogTypes.Error);
+				return false;
+			}
+
+			Log("Fetching Latest Job ID...");
+			string latestJobId = (string)appveyor.SelectToken("build.jobs[0].jobId");
+			if (string.IsNullOrEmpty(latestJobId)) {
+				Log("Job ID was not found in the AppVeyor response.", LogTypes.Error);
+				return false;
+            }
+
+			Log("Downloading DeSmuME-VS2019-x64-Release.exe Job Artifact...");
+			try {
+				new WebClient().DownloadFile(
+					"https://ci.appveyor.com/api/buildjobs/" + latestJobId + "/artifacts/desmume/src/frontend/windows/__bins/DeSmuME-VS2019-x64-Release.exe",
+					savePath
+				);
+			} catch (WebException e) {
+				Log("A download error occured: " + e.Message, LogTypes.Error);
+				return false;
+            }
+
+			return true;
+		}
+
+		private static Process RunDesmume(string Argument=null) {
 			Process p = new Process() {
 				StartInfo = new ProcessStartInfo() {
-					FileName = DESMUME_LOCATION,
-					Arguments = ARGUMENT
+					FileName = DesmumeLocation,
+					Arguments = Argument
 				}
 			};
 			p.Start();
 			p.WaitForInputIdle();
-			#endregion
-
+			return p;
 		}
-		
-		private static void GetDesmume() {
-			if (File.Exists(DesmumeLocation)) return;
-			
-			Log(
-				"DeSmuME isn't next to DeSmuMAR, do you want DeSmuMAR to automatically download the " +
-				"latest DeSmuME DEV Build from the AppVeyor CI? (y/n)"
-			);
-			if (Console.ReadKey().Key != ConsoleKey.Y) return;
-			
-			Console.Write("\nFetching DeSmuME AppVeyor CI Status...");
-			var appveyorApi = new WebClient {Headers = {{"Accept", "application/json"}}}
-				.DownloadString("https://ci.appveyor.com/api/projects/zeromus/desmume");
 
-			Console.Write("\nFetching Latest Job ID...");
-			var latestJobId = Regex.Match(appveyorApi, "\"jobId\":\"([^\"]*)");
-			if (!latestJobId.Success) {
-				Log("FAILED! The response from AppVeyor was unexpected. Closing DeSmuMAR in 5 seconds...", LogTypes.Error);
-				Thread.Sleep(5000);
-			} else {
-				Console.Write(" DONE! " + latestJobId.Groups[1].Value + "\nDownloading \"DeSmuME-VS2019-x64-Release.exe\"......");
-				new WebClient().DownloadFile("https://ci.appveyor.com/api/buildjobs/" + latestJobId.Groups[1].Value + "/artifacts/desmume/src/frontend/windows/__bins/DeSmuME-VS2019-x64-Release.exe", DesmumeLocation);
-				Log("DONE! Downloaded DeSmuME! Restarting DeSmuMAR in 5 seconds...");
-				Thread.Sleep(5000);
-				Process.Start(LocateMe, _argument);
+		private static (int, int, int) EnsureSizeConstraint(int maxWidth, int maxHeight) {
+			SettingsFlags flags = SettingsFlags.None;
+			bool WidthSafe = false;
+			bool HeightSafe = false;
+			int Width = -1;
+			int Height = -1;
+			int LCDLayout = -1;
+			while (!WidthSafe || !HeightSafe) {
+				int[] AspectRatio = GetSetting<string>("AspectRatio", flags).Split(':').Select(int.Parse).ToArray();
+				LCDLayout = GetSetting<bool>("Screens", flags | SettingsFlags.BoolOnly) ? 1 : 2;
+				Height = GetSetting<int>("Resolution", flags | SettingsFlags.NumericOnly);
+				Width = Height / AspectRatio[1] * AspectRatio[0] * (LCDLayout == 1 ? 2 : 1);
+				WidthSafe = Width < maxWidth;
+				HeightSafe = Height < maxHeight;
+				if (!WidthSafe || !HeightSafe) {
+					Log(
+						"Oh no! The Aspect Ratio and Resolution you chose would result in a DeSmuME window that is bigger than your display.\n" +
+						"To reduce the size, try reduce the resolution or use a smaller aspect ratio\n" +
+						((maxWidth / maxHeight) == (Width / Height) ? "Since you are trying to use the same aspect ratio for DeSmuME as your Screen, i'm assuming you want to go fullscreen, if this is the case, you should lower the resolution or set the screens amount to \"One LCD\" in DeSmuME as that will help lower the window size.\n" : string.Empty) +
+						"If your curious, you tried to resize DeSmuME to " + Width + "x" + Height + "\n" +
+						"That size is: " +
+						(!WidthSafe ? (Width - maxWidth).ToString() + " pixels wider" : string.Empty) +
+						(!WidthSafe && !HeightSafe ? " & " : string.Empty) +
+						(!HeightSafe ? (Height - maxHeight).ToString() + " pixels taller" : string.Empty) +
+						" than your display :O"
+					, LogTypes.Warning);
+					Log("Let's go ahead and reset the AspectRatio, Screens, and Resolution value's so you can enter new values.");
+					flags = SettingsFlags.ForceReset;
+				}
 			}
-			Environment.Exit(0);
-		}
+			return (Width, Height, LCDLayout);
+        }
 		
 		enum LogTypes {
 			Info,
@@ -210,12 +249,13 @@ namespace DeSmuMAR {
 			AlphaNumericOnly=4,
 			BoolOnly=8,
 			Lowercase=16,
-			UniqueOnly=32
+			UniqueOnly=32,
+			ForceReset=64
 		}
 		static T GetSetting<T>(string Setting, SettingsFlags Flags = SettingsFlags.None) {
 			while(true) {
-				if (!SETTINGS_FORCE_OVERWRITE && SETTINGS != null) {
-					IEnumerable<string> KeysMatched = SETTINGS.Where(x => x.StartsWith(Setting + "="));
+				if (!Flags.HasFlag(SettingsFlags.ForceReset) && Settings != null) {
+					IEnumerable<string> KeysMatched = Settings.Where(x => x.StartsWith(Setting + "="));
 					if (KeysMatched != null && KeysMatched.Any()) {
 						try {
 							return (T)Convert.ChangeType(KeysMatched.First().Split('=')[1], typeof(T));
@@ -240,6 +280,7 @@ namespace DeSmuMAR {
 				}
 				Console.WriteLine(Message + ":");
 				string Answer = Console.ReadLine();
+				// Apply changes to the input value based on the flag
 				if (Flags.HasFlag(SettingsFlags.BoolOnly)) {
 					Flags |= SettingsFlags.UniqueOnly | SettingsFlags.Lowercase;
 				}
@@ -261,14 +302,27 @@ namespace DeSmuMAR {
 				if (Flags.HasFlag(SettingsFlags.BoolOnly)) {
 					Answer = Regex.Replace(Answer, "[^yn]", string.Empty).Replace("y", "true").Replace("n", "false");
 				}
-				UpdateINI(SETTINGS_FILE, new string[][] {
-					new string[] {"General", Setting, Answer}
-				});
-				try {
-					return (T)Convert.ChangeType(Answer, typeof(T));
-				} catch (Exception ex) {
-					Log(ex.Message.Replace("String was not recognized as a valid", "Invalid") + " Please type the expected response.", LogTypes.Warning);
+				// Run sanitization checks on the Answer based on Setting key
+				bool invalid = false;
+				switch (Setting) {
+					case "AspectRatio":
+						if (!Answer.Contains(":") || !Answer.Replace(":", string.Empty).All(char.IsDigit)) {
+							Log("Invalid aspect ratio format.");
+							invalid = true;
+						}
+						break;
 				}
+				// If sanitization check passed, return the new answer, otherwise loop
+				if (!invalid) {
+					UpdateINI(DemumarSettingsFile, new string[][] {
+						new string[] {"General", Setting, Answer}
+					});
+					try {
+						return (T)Convert.ChangeType(Answer, typeof(T));
+					} catch (Exception ex) {
+						Log(ex.Message.Replace("String was not recognized as a valid", "Invalid") + " Please type the expected response.", LogTypes.Warning);
+					}
+                }
 			}
 		}
 
