@@ -48,7 +48,6 @@ namespace DeSmuMAR {
 		private static string[] Settings => File.Exists(DemumarSettingsFile) ? File.ReadAllLines(DemumarSettingsFile, Encoding.UTF8) : null;
 
 		static void Main(string[] args) {
-
 			// Ensure DeSmuME is available
 			if (!File.Exists(DesmumeLocation)) {
 				Log("There's no \"DeSmuME.exe\" next to DeSmuMAR, want to automatically download the latest Dev build? (y/n)");
@@ -59,24 +58,22 @@ namespace DeSmuMAR {
                         "nice experience with different aspect ratio's, then take my warning!"
                     );
                     return;
-                } else {
-                    if (!DownloadDesmumeDev(DesmumeLocation)) {
-						Log("Failed to download DeSmuME, closing DeSmuMAR...", LogTypes.Error);
-						return;
-                    } else {
-						Log("Downloaded DeSmuME and placed it to \"" + DesmumeLocation + "\".");
-					}
                 }
+				Log("Downloading...");
+                if (!DownloadDesmumeDev(DesmumeLocation)) {
+					Log("Failed to download DeSmuME, closing DeSmuMAR...", LogTypes.Error);
+					return;
+                }
+				Log("Downloaded DeSmuME and placed it to \"" + DesmumeLocation + "\".");
             }
-
 			// Ensure the aspect ratio set won't escape the size constraints of the display
 			(int Width, int Height, int LCDLayout) = EnsureSizeConstraint(
 				(int)SystemParameters.VirtualScreenWidth, (int)SystemParameters.VirtualScreenHeight
 			);
-
 			// Force some DeSmuME settings that are necessary for custom aspect ratio use
 			if (!File.Exists(DesmumeSettingsFile)) {
-				Log("Opening DeSmuME just for a second for it to create a default configuration file...");
+				Log("No DeSmuME configuration file available");
+				Log("Opening DeSmuME just for a second for it to create a new configuration file");
 				RunDesmume().Kill();
 			}
 			UpdateINI(DesmumeSettingsFile, new string[][] {
@@ -84,17 +81,15 @@ namespace DeSmuMAR {
 				new string[] {"Console", "Show", "0"},
 				new string[] {"Display", "Show Toolbar", "0"},
 				new string[] {"Video", "Window Force Ratio", "0"},
-				new string[] {"Video", "LCDsLayout", LCDLayout.ToString() },
+				new string[] {"Video", "LCDsLayout", LCDLayout.ToString()},
 				new string[] {"Video", "Window Lockdown", "0"},
 				new string[] {"Video", "Display Method", "1"},
 				new string[] {"Video", "Window width", "1"},
 				new string[] {"Video", "Window width", Width.ToString()},
 				new string[] {"Video", "Window height", Height.ToString()}
 			});
-
 			// Run DeSmuME with the first argument provided to DeSmuMAR (if available, this should be the ROM path)
 			RunDesmume(args.Length > 0 ? "\"" + args[0] + "\"" : null);
-
 		}
 
 		private static bool DownloadDesmumeDev(string savePath) {
