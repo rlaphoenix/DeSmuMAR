@@ -188,16 +188,15 @@ namespace DeSmuMAR {
 			Error
 		}
 		static void Log(string Message, LogTypes Type = LogTypes.Info) {
-			if (Type == LogTypes.Warning) {
-				Console.ForegroundColor = ConsoleColor.DarkMagenta;
+			if (Type == LogTypes.Info) {
+				Console.ForegroundColor = ConsoleColor.White;
+			} else if (Type == LogTypes.Warning) {
+				Console.ForegroundColor = ConsoleColor.Yellow;
 			} else if (Type == LogTypes.Error) {
-				Console.ForegroundColor = ConsoleColor.DarkRed;
+				Console.ForegroundColor = ConsoleColor.Red;
             } else {
-				Console.ForegroundColor = ConsoleColor.Gray;
+				throw new NotImplementedException("Log type must be Info, Warning, or Error");
             }
-			if (Type != LogTypes.Info) {
-				Console.BackgroundColor = ConsoleColor.White;
-			}
 			Console.WriteLine(Message);
 			Console.ResetColor();
 		}
