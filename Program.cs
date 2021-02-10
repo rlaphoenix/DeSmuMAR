@@ -193,12 +193,10 @@ namespace DeSmuMAR {
 			} else if (Type == LogTypes.Error) {
 				Console.ForegroundColor = ConsoleColor.DarkRed;
             } else {
-				// TODO: Change to default rather than assume Gray
 				Console.ForegroundColor = ConsoleColor.Gray;
             }
 			if (Type != LogTypes.Info) {
 				Console.BackgroundColor = ConsoleColor.White;
-				SetWindowPos(Process.GetCurrentProcess().MainWindowHandle, new IntPtr(HWND_TOPMOST), 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
 			}
 			Console.WriteLine(Message);
 			Console.ResetColor();
