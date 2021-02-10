@@ -188,8 +188,15 @@ namespace DeSmuMAR {
 			Error
 		}
 		static void Log(string Message, LogTypes Type = LogTypes.Info) {
-			Console.ForegroundColor = Type == LogTypes.Warning ? ConsoleColor.DarkMagenta : Type == LogTypes.Error ? ConsoleColor.DarkRed : ConsoleColor.Gray;
-			if(Type != LogTypes.Info) {
+			if (Type == LogTypes.Warning) {
+				Console.ForegroundColor = ConsoleColor.DarkMagenta;
+			} else if (Type == LogTypes.Error) {
+				Console.ForegroundColor = ConsoleColor.DarkRed;
+            } else {
+				// TODO: Change to default rather than assume Gray
+				Console.ForegroundColor = ConsoleColor.Gray;
+            }
+			if (Type != LogTypes.Info) {
 				Console.BackgroundColor = ConsoleColor.White;
 				SetWindowPos(Process.GetCurrentProcess().MainWindowHandle, new IntPtr(HWND_TOPMOST), 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
 			}
