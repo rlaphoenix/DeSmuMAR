@@ -93,45 +93,44 @@ namespace DeSmuMAR {
 		}
 
 		private static bool DownloadDesmumeDev(string savePath) {
-
-			Log("Fetching Status of AppVeyor zeromus/desmume...");
-            string appveyorRes;
-            try {
-				appveyorRes = new WebClient { Headers = { { "Accept", "application/json" } } }
-					.DownloadString("https://ci.appveyor.com/api/projects/zeromus/desmume");
-				if (string.IsNullOrEmpty(appveyorRes)) {
-					Log("The response from AppVeyor was empty or failed to be read.", LogTypes.Error);
-					return false;
-				}
+			Log("Fetching API Data of AppVeyor: zeromus/desmume");
+			WebClient session = new WebClient { Headers = { { "Accept", "application/json,*/*" } } };
+			string appveyorRes;
+			JObject appveyor;
+			try {
+				appveyorRes = session.DownloadString("https://ci.appveyor.com/api/projects/zeromus/desmume");
 			} catch (WebException e) {
-				Log("A download error occured: " + e.Message, LogTypes.Error);
+				Log(" - Failed! A Web Exception occured: " + e.Message, LogTypes.Error);
 				return false;
 			}
-
-			Log("Reading response as JSON...");
-			JObject appveyor;
+			if (string.IsNullOrEmpty(appveyorRes)) {
+				Log(" - Failed! The response from AppVeyor was empty.", LogTypes.Error);
+				return false;
+			}
 			try {
 				appveyor = JObject.Parse(appveyorRes);
 			} catch (JsonReaderException) {
-				Log("The response from AppVeyor was empty or corrupted.", LogTypes.Error);
+				Log(" - Failed! The response from AppVeyor is not valid JSON syntax.", LogTypes.Error);
 				return false;
 			}
+			Log(" + Obtained");
 
-			Log("Fetching Latest Job ID...");
 			string latestJobId = (string)appveyor.SelectToken("build.jobs[0].jobId");
 			if (string.IsNullOrEmpty(latestJobId)) {
-				Log("Job ID was not found in the AppVeyor response.", LogTypes.Error);
+				Log(" - Job ID was not found.", LogTypes.Error);
 				return false;
             }
+			Log(" + Job ID " + latestJobId + " discovered");
 
 			Log("Downloading DeSmuME-VS2019-x64-Release.exe Job Artifact...");
 			try {
-				new WebClient().DownloadFile(
+				session.DownloadFile(
+					// TODO: Is there an appveyor API that could be used to more gracefully obtain this path?
 					"https://ci.appveyor.com/api/buildjobs/" + latestJobId + "/artifacts/desmume/src/frontend/windows/__bins/DeSmuME-VS2019-x64-Release.exe",
 					savePath
 				);
 			} catch (WebException e) {
-				Log("A download error occured: " + e.Message, LogTypes.Error);
+				Log(" - Failed! A Web Exception occured: " + e.Message, LogTypes.Error);
 				return false;
             }
 
