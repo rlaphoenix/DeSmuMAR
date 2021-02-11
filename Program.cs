@@ -16,33 +16,6 @@ namespace DeSmuMAR
     class Program
     {
 
-        #region API's and Structs
-
-        [StructLayout(LayoutKind.Sequential)]
-        public struct RECT
-        {
-            public int left;
-            public int top;
-            public int right;
-            public int bottom;
-        }
-
-        [DllImport("user32.dll", SetLastError = true)]
-        static extern bool GetWindowRect(IntPtr hWnd, ref RECT Rect);
-
-        [DllImport("user32.dll", SetLastError = true)]
-        static extern bool MoveWindow(IntPtr hWnd, int X, int Y, int Width, int Height, bool Repaint);
-
-        [DllImport("user32.dll", SetLastError = true)]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        private static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int x, int y, int cx, int cy, int uFlags);
-
-        private const int HWND_TOPMOST = -1;
-        private const int SWP_NOMOVE = 0x0002;
-        private const int SWP_NOSIZE = 0x0001;
-
-        #endregion
-
         private static readonly string Home = Path.GetDirectoryName(System.Reflection.Assembly.GetEntryAssembly().Location);
         private static readonly string DemumarSettingsFile = Path.Combine(Home, "DeSmuMAR.ini");
         private static readonly string DesmumeLocation = Path.Combine(Home, "DeSmuME.exe");
