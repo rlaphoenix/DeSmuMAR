@@ -1,75 +1,93 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+<Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{322B7EBC-B4CC-45BE-A5EC-E081F279B85C}</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <RootNamespace>DeSmuMAR</RootNamespace>
-    <AssemblyName>DeSmuMAR</AssemblyName>
-    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
-    <Deterministic>true</Deterministic>
-    <TargetFrameworkProfile />
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-  <PropertyGroup>
-    <ApplicationManifest>app.manifest</ApplicationManifest>
-  </PropertyGroup>
-  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
     <StartupObject>DeSmuMAR.Program</StartupObject>
+    <ApplicationIcon>DeSmuME.ico</ApplicationIcon>
+    <Copyright>© rlaPHOENiX 2020</Copyright>
+    <Description>An automated aspect ratio based resizing method for DeSmuME for playing in specific Aspect Ratio's.</Description>
+    <PackageId>DeSmuMAR</PackageId>
+    <Authors>rlaPHOENiX</Authors>
+    <Company>rlaPHOENiX</Company>
+    <PackageLicenseExpression>GPLv3</PackageLicenseExpression>
+    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+    <PackageProjectUrl>https://github.com/rlaPHOENiX/DeSmuMAR</PackageProjectUrl>
+    <PackageIcon></PackageIcon>
+    <RepositoryUrl>https://github.com/rlaPHOENiX/DeSmuMAR</RepositoryUrl>
+    <RepositoryType>GitHub</RepositoryType>
+    <PackageTags>emulator, nintendo, emulation, nintendo-ds, desmume</PackageTags>
+    <PackageReleaseNotes># 1.7.0 Hello .NET Core
+
+- Migrate from .NET Framework v4.8 to .NET Core 3.1.
+- Instead of using the entire virtual screen size as the constraint, use only the active monitor/display's size.
+- Reduce the amount of Win32 APIs that need to be called.
+- General small clean up and improvements on the code.
+
+# 1.6.0 Workflow improvements and bug fixes
+
+- AppVeyor CI changed a bit making it necessary to use JSON parsing, so now a Newtonsoft.Json.dll will be alongside the DeSmuMAR.exe file.
+- Fix the AppVeyor CI JobID parsing as well as improve the entire DeSmuME.exe check and download process.
+- Update to .NET Framework 4.8 (perhaps .Net Core in the future?).
+- Section off lots of the code to their own functions instead of cramming it into main.
+- Remove the base64-encoded default settings data for DeSmuME as it could go out of date and I'd like to avoid that, replaced that with an actual call that will open DeSmuME.exe very briefly, just enough for it to create the settings file itself which would keep it up-to-date.
+- Improve how it verifies the input data as well as how it re-asks for new data when invalid.
+- Fix a slight (but breaking) bug with the while check inside the size constraint checks that could cause it to accidentally continue when it shouldn't, causing DeSmuME to potentially have unusable settings or make it hard to get into DeSmuME's settings menu to fix them.
+- When storing new settings values, also update the `Settings` variable so the next call to GetSettings will be up-to-date.
+- General code readability improvements as well as some improvements to logging.
+
+# 1.5.2 Update DEV release CI links and exectuable path
+
+- Fixed the links related to downloading the Devel Auto Build AppVeyor links and updated the build it auto-downloads from the VS2015 builds to VS2019 builds.
+
+# 1.5.1 DeSmuME Path Hotfix
+
+- Add a locateme for DeSmuME.exe stuff to fix bug where it failed to detect DeSmuME if DeSmuMAR is run from a Shortcut or via File Association/Drag&amp;Drop.
+
+# 1.5.0 New Resize Method + Auto Settings
+
+- Use DeSmuME's desmume.ini to set the window size instead of using the Win32 MoveWindow API. This allows more accuracy if your Windows have abnormal border or top-bar sizes.
+- Disable DeSmuME's toolbar as it interferes with desmume.ini's window size.
+- Add a size constraint to prevent it from resizing outside of the displays bounds.
+
+# 1.4.2 Renamed to DeSmuMAR
+
+- Renamed the project from DeSmuME Resizer to DeSmuMAR (Meaning DeSmuME Aspect Ratio).
+
+# 1.4.1 Settings Hotfix
+
+- Small fix as settings flags were being improperly used. Fixes #1
+
+# 1.4.0 ROM Passthrough
+
+- Have the first argument provided to DeSmuMAR to be directly passed through to DeSmuME.exe. Allowing you to pass a ROM file path for DeSmuME.exe to auto start, use DeSmuMAR as a Wrapper for DeSmuME.exe for Shortcuts/File-Association/Drag &amp; Drop!
+
+# 1.3.0 Settings Fixed, Implemented Aspect Ratio and Screen Count Settings
+
+- Fixed broken settings.
+- Implemented a custom aspect ratio setting.
+- Implemented a screen count setting.
+
+# 1.2.0 General fixes and improvements
+
+- Ensure DeSmuME's "Maintain Aspect Ratio" setting is disabled.
+- General improvements.
+
+# 1.1.0 Initial Source Code Release
+
+- This is the first release to have source code released due to popular demand.
+- It includes various fixes and improvements over the v1.0.0 release that was only available on the GBATemp forum.</PackageReleaseNotes>
+    <AssemblyVersion>1.0.0.0</AssemblyVersion>
+    <FileVersion>1.7.0.0</FileVersion>
+    <Version>1.7.0</Version>
   </PropertyGroup>
-  <PropertyGroup>
-    <ApplicationIcon>DeSmuME Icon.ico</ApplicationIcon>
-  </PropertyGroup>
+
   <ItemGroup>
-    <Reference Include="PresentationFramework" />
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Net.Http" />
-    <Reference Include="System.Xml" />
+    <None Remove="DeSmuME.ico" />
   </ItemGroup>
+
   <ItemGroup>
-    <Compile Include="Program.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
   </ItemGroup>
-  <ItemGroup>
-    <None Include="App.config" />
-    <None Include="app.manifest">
-      <SubType>Designer</SubType>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="DeSmuME Icon.ico" />
-  </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="Newtonsoft.Json">
-      <Version>12.0.3</Version>
-    </PackageReference>
-  </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+
 </Project>

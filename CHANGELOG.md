@@ -1,3 +1,10 @@
+# 1.7.0 Hello .NET Core
+
+- Migrate from .NET Framework v4.8 to .NET Core 3.1.
+- Instead of using the entire virtual screen size as the constraint, use only the active monitor/display's size.
+- Reduce the amount of Win32 APIs that need to be called.
+- General small clean up and improvements on the code.
+
 # 1.6.0 Workflow improvements and bug fixes
 
 - AppVeyor CI changed a bit making it necessary to use JSON parsing, so now a Newtonsoft.Json.dll will be alongside the DeSmuMAR.exe file.

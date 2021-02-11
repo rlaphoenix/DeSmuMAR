@@ -7,21 +7,20 @@ using System.Net;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Windows;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using static DeSmuMAR.Native;
 
 namespace DeSmuMAR
 {
     class Program
     {
-
         private static readonly string Home = Path.GetDirectoryName(System.Reflection.Assembly.GetEntryAssembly().Location);
-        private static readonly string DemumarSettingsFile = Path.Combine(Home, "DeSmuMAR.ini");
+        private static readonly string DesmumarSettingsFile = Path.Combine(Home, "DeSmuMAR.ini");
         private static readonly string DesmumeLocation = Path.Combine(Home, "DeSmuME.exe");
         private static readonly string DesmumeSettingsFile = Path.Combine(Home, "desmume.ini");
 
-        private static string[] Settings => File.Exists(DemumarSettingsFile) ? File.ReadAllLines(DemumarSettingsFile, Encoding.UTF8) : null;
+        private static string[] Settings => File.Exists(DesmumarSettingsFile) ? File.ReadAllLines(DesmumarSettingsFile, Encoding.UTF8) : null;
 
         static void Main(string[] args)
         {
@@ -46,10 +45,13 @@ namespace DeSmuMAR
                 }
                 Log("Downloaded DeSmuME and placed it to \"" + DesmumeLocation + "\".");
             }
+            // Get active screen information
+            const int ENUM_CURRENT_SETTINGS = -1;
+            DEVMODE devMode = default;
+            devMode.dmSize = (short)Marshal.SizeOf(devMode);
+            EnumDisplaySettings(null, ENUM_CURRENT_SETTINGS, ref devMode);  // null == current active monitor/screen
             // Ensure the aspect ratio set won't escape the size constraints of the display
-            (int Width, int Height, int LCDLayout) = EnsureSizeConstraint(
-                (int)SystemParameters.VirtualScreenWidth, (int)SystemParameters.VirtualScreenHeight
-            );
+            (int Width, int Height, int LCDLayout) = EnsureSizeConstraint(devMode.dmPelsWidth, devMode.dmPelsHeight);
             // Force some DeSmuME settings that are necessary for custom aspect ratio use
             if (!File.Exists(DesmumeSettingsFile))
             {
@@ -291,21 +293,13 @@ namespace DeSmuMAR
                     }
                 }
                 string Message = string.Empty;
-                switch (Setting)
+                Message = Setting switch
                 {
-                    case "AspectRatio":
-                        Message = "Which aspect ratio do you want (e.g. 4:3, 16:9, 21:9, e.t.c)";
-                        break;
-                    case "Screens":
-                        Message = "Do you want both screens to be shown with DeSmuME? (y/n)";
-                        break;
-                    case "Resolution":
-                        Message = "Which resolution do you want (e.g. 720, 1080, 1440, e.t.c)";
-                        break;
-                    default:
-                        Message = "ERROR OCCURED!";
-                        break;
-                }
+                    "AspectRatio" => "Which aspect ratio do you want (e.g. 4:3, 16:9, 21:9, e.t.c)",
+                    "Screens" => "Do you want both screens to be shown with DeSmuME? (y/n)",
+                    "Resolution" => "Which resolution do you want (e.g. 720, 1080, 1440, e.t.c)",
+                    _ => "ERROR OCCURED!",
+                };
                 Console.WriteLine(Message + ":");
                 string Answer = Console.ReadLine();
                 // Apply changes to the input value based on the flag
@@ -352,7 +346,7 @@ namespace DeSmuMAR
                 // If sanitization check passed, return the new answer, otherwise loop
                 if (!invalid)
                 {
-                    UpdateINI(DemumarSettingsFile, new string[][] {
+                    UpdateINI(DesmumarSettingsFile, new string[][] {
                         new string[] {"General", Setting, Answer}
                     });
                     try
@@ -366,6 +360,5 @@ namespace DeSmuMAR
                 }
             }
         }
-
     }
 }
