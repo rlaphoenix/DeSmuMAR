@@ -14,6 +14,14 @@ file to make changes, or delete it for it to ask you again.
 
   [Latest Release]: <https://github.com/rlaPHOENiX/DeSmuMAR/releases/latest/download/DeSmuMAR.zip>
 
+## Credits
+
+The Icon file [DeSmuME.ico] is owned by [@TASVideos] of the [DeSmuME] project and is used to feel more like a Wrapper of DeSmuME when used as a shortcut or file type association.
+
+  [DeSmuME.ico]: <DeSmuME.ico>
+  [DeSmuME]: <https://github.com/TASVideos/DeSmuME>
+  [@TASVideos]: <https://github.com/TASVideos>
+
 ## License
 
 This project uses the GNU General Public License v3.0 (GPLv3). By using this project in any way you agree you the terms of the License.
