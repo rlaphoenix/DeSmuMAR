@@ -1,0 +1,53 @@
+# 1.6.0 Workflow improvements and bug fixes
+
+- AppVeyor CI changed a bit making it necessary to use JSON parsing, so now a Newtonsoft.Json.dll will be alongside the DeSmuMAR.exe file.
+- Fix the AppVeyor CI JobID parsing as well as improve the entire DeSmuME.exe check and download process.
+- Update to .NET Framework 4.8 (perhaps .Net Core in the future?).
+- Section off lots of the code to their own functions instead of cramming it into main.
+- Remove the base64-encoded default settings data for DeSmuME as it could go out of date and I'd like to avoid that, replaced that with an actual call that will open DeSmuME.exe very briefly, just enough for it to create the settings file itself which would keep it up-to-date.
+- Improve how it verifies the input data as well as how it re-asks for new data when invalid.
+- Fix a slight (but breaking) bug with the while check inside the size constraint checks that could cause it to accidentally continue when it shouldn't, causing DeSmuME to potentially have unusable settings or make it hard to get into DeSmuME's settings menu to fix them.
+- When storing new settings values, also update the `Settings` variable so the next call to GetSettings will be up-to-date.
+- General code readability improvements as well as some improvements to logging.
+
+# 1.5.2 Update DEV release CI links and exectuable path
+
+- Fixed the links related to downloading the Devel Auto Build AppVeyor links and updated the build it auto-downloads from the VS2015 builds to VS2019 builds.
+
+# 1.5.1 DeSmuME Path Hotfix
+
+- Add a locateme for DeSmuME.exe stuff to fix bug where it failed to detect DeSmuME if DeSmuMAR is run from a Shortcut or via File Association/Drag&Drop.
+
+# 1.5.0 New Resize Method + Auto Settings
+
+- Use DeSmuME's desmume.ini to set the window size instead of using the Win32 MoveWindow API. This allows more accuracy if your Windows have abnormal border or top-bar sizes.
+- Disable DeSmuME's toolbar as it interferes with desmume.ini's window size.
+- Add a size constraint to prevent it from resizing outside of the displays bounds.
+
+# 1.4.2 Renamed to DeSmuMAR
+
+- Renamed the project from DeSmuME Resizer to DeSmuMAR (Meaning DeSmuME Aspect Ratio).
+
+# 1.4.1 Settings Hotfix
+
+- Small fix as settings flags were being improperly used. Fixes #1
+
+# 1.4.0 ROM Passthrough
+
+- Have the first argument provided to DeSmuMAR to be directly passed through to DeSmuME.exe. Allowing you to pass a ROM file path for DeSmuME.exe to auto start, use DeSmuMAR as a Wrapper for DeSmuME.exe for Shortcuts/File-Association/Drag & Drop!
+
+# 1.3.0 Settings Fixed, Implemented Aspect Ratio and Screen Count Settings
+
+- Fixed broken settings.
+- Implemented a custom aspect ratio setting.
+- Implemented a screen count setting.
+
+# 1.2.0 General fixes and improvements
+
+- Ensure DeSmuME's "Maintain Aspect Ratio" setting is disabled.
+- General improvements.
+
+# 1.1.0 Initial Source Code Release
+
+- This is the first release to have source code released due to popular demand.
+- It includes various fixes and improvements over the v1.0.0 release that was only available on the GBATemp forum.
