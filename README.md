@@ -1,18 +1,34 @@
 # DeSmuMAR
+
 DeSmuME Aspect Ratio is an automated aspect ratio based resizing method for DeSmuME for playing in specific Aspect Ratio's.
+
+## Installation
+
+Notes:
+
+1. `DeSmuMAR.exe` must always be next to `DeSmuME.exe`.
+2. DeSmuMAR gives you the option to install a required nightly version automatically if not found. See Installation steps below.
+
+### Requirements
+
+- [.NET Core 3.1 Runtime]
+- [DeSmuME] Nightly. v0.9.11 and older is unsupported. The download page has recommendations for each OS.
+
+### Setup
+
+1. Download the [Latest Release] and extract the downloaded files next to `DeSmuME.exe`. If you don't already have DeSmuME, then extract to the location you wish `DeSmuME.exe` to be located and DeSmuMAR will give you the option to download the latest nightly release.
+
+  [.NET Core 3.1 Runtime]: <https://dotnet.microsoft.com/download/dotnet/3.1>
+  [DeSmuME]: <https://desmume.org/download>
+  [Latest Release]: <https://github.com/rlaPHOENiX/DeSmuMAR/releases/latest/download/DeSmuMAR.zip>
 
 ## Usage
 
-Download the [Latest Release] and extract the files next to DeSmuME. If you don't already have DeSmuME, extract it where you
-wish DeSmuME to be as DeSmuMAR has an option to download the latest development release for you, which it will save next to DeSmuMAR.exe.
+It's intended to be used as a wrapper. Use `DeSmuMAR.exe` exactly as you would `DeSmuME.exe`; feel free to use it as the `.nds` file extension association, as DeSmuME shortcuts, rename that shortcut to anything (e.g. `DeSmuME`), etc.
 
-DeSmuMAR.exe must be next to DeSmuME.exe for it to work. The intended way to use DeSmuMAR is as a wrapper of DeSmuME.exe, essentially use
-DeSmuMAR.exe exactly as you would DeSmuME.exe, e.g. as a Shortcut in your Start menu, as a file type association for .NDS, etc.
+DeSmuMAR will only ask you the configuration you wish to use at first launch. If you wish to make changes, then you will need to manually edit the `DeSmuMAR.ini` settings file next to `DeSmuMAR.exe`. You may also delete the settings file and re-launch for it to re-ask you.
 
-DeSmuMAR will only ask you the configuration you wish to use once, after that you will need to manually edit the DeSmuMAR.ini settings
-file to make changes, or delete it for it to ask you again.
-
-  [Latest Release]: <https://github.com/rlaPHOENiX/DeSmuMAR/releases/latest/download/DeSmuMAR.zip>
+All DeSmuMAR actually does is take into consideration the chosen aspect ratio, resolution (as height) and DeSmuME's current display size and resizes the window accordingly. Sadly DeSmuME has no real support for setting an aspect ratio.
 
 ## Credits
 
