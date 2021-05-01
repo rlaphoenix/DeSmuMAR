@@ -80,9 +80,7 @@
     <AssemblyVersion>1.0.0.0</AssemblyVersion>
     <FileVersion>1.7.0.0</FileVersion>
     <Version>1.7.0</Version>
-    <SignAssembly>true</SignAssembly>
-    <AssemblyOriginatorKeyFile>assemblysigncert.pfx</AssemblyOriginatorKeyFile>
-    <DelaySign>true</DelaySign>
+    <SignAssembly>false</SignAssembly>
   </PropertyGroup>
 
   <ItemGroup>
