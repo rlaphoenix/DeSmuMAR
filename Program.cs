@@ -161,8 +161,8 @@ namespace DeSmuMAR
                 LCDLayout = GetSetting<bool>("Screens", flags | SettingsFlags.BoolOnly) ? 1 : 2;
                 Height = GetSetting<int>("Resolution", flags | SettingsFlags.NumericOnly);
                 Width = Height / AspectRatio[1] * AspectRatio[0] * (LCDLayout == 1 ? 2 : 1);
-                WidthSafe = Width < maxWidth;
-                HeightSafe = Height < maxHeight;
+                WidthSafe = Width <= maxWidth;
+                HeightSafe = Height <= maxHeight;
                 if (!WidthSafe || !HeightSafe)
                 {
                     Log(
