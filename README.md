@@ -1,6 +1,6 @@
 # DeSmuMAR
 
-[![.NET version tests](https://img.shields.io/github/workflow/status/rlaphoenix/desmumar/Build)](https://github.com/rlaphoenix/desmumar/releases)
+[![.NET version tests](https://img.shields.io/github/actions/workflow/status/rlaphoenix/desmumar/build.yml?branch=master)](https://github.com/rlaphoenix/desmumar/releases)
 
 DeSmuME Aspect Ratio is an automated aspect ratio based resizing method for DeSmuME for playing in specific Aspect Ratio's.
 
