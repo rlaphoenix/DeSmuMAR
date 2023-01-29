@@ -13,7 +13,7 @@
     <PackageLicenseExpression>GPLv3</PackageLicenseExpression>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
     <PackageProjectUrl>https://github.com/rlaphoenix/DeSmuMAR</PackageProjectUrl>
-    <PackageIcon></PackageIcon>
+    <PackageIcon>DeSmuME.png</PackageIcon>
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/rlaphoenix/DeSmuMAR</RepositoryUrl>
     <PackageTags>emulator, nintendo, emulation, nintendo-ds, desmume</PackageTags>
@@ -91,6 +91,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="DeSmuME.png">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
     <None Update="README.md">
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
