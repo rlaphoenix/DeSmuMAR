@@ -22,7 +22,7 @@ Notes:
 
   [.NET Core 3.1 Runtime]: <https://dotnet.microsoft.com/download/dotnet/3.1>
   [DeSmuME]: <https://desmume.org/download>
-  [Latest Release]: <https://github.com/rlaPHOENiX/DeSmuMAR/releases/latest/download/DeSmuMAR.zip>
+  [Latest Release]: <https://github.com/rlaphoenix/DeSmuMAR/releases/latest/download/DeSmuMAR.zip>
 
 ## Usage
 

@@ -8,14 +8,14 @@
     <Copyright>© rlaPHOENiX 2020-2023</Copyright>
     <Description>An automated aspect ratio based resizing method for DeSmuME for playing in specific Aspect Ratio's.</Description>
     <PackageId>DeSmuMAR</PackageId>
-    <Authors>rlaPHOENiX</Authors>
-    <Company>rlaPHOENiX</Company>
+    <Authors>rlaphoenix</Authors>
+    <Company>rlaphoenix</Company>
     <PackageLicenseExpression>GPLv3</PackageLicenseExpression>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
-    <PackageProjectUrl>https://github.com/rlaPHOENiX/DeSmuMAR</PackageProjectUrl>
+    <PackageProjectUrl>https://github.com/rlaphoenix/DeSmuMAR</PackageProjectUrl>
     <PackageIcon></PackageIcon>
-    <RepositoryUrl>https://github.com/rlaPHOENiX/DeSmuMAR</RepositoryUrl>
     <RepositoryType>GitHub</RepositoryType>
+    <RepositoryUrl>https://github.com/rlaphoenix/DeSmuMAR</RepositoryUrl>
     <PackageTags>emulator, nintendo, emulation, nintendo-ds, desmume</PackageTags>
     <PackageReleaseNotes># 1.7.0 Hello .NET Core
 
