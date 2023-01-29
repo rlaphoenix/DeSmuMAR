@@ -13,14 +13,14 @@ Notes:
 
 ### Requirements
 
-- [.NET Core 3.1 Runtime]
+- [.NET 6.0 Runtime]
 - [DeSmuME] Nightly. v0.9.11 and older is unsupported. The download page has recommendations for each OS.
 
 ### Setup
 
 1. Download the [Latest Release] and extract the downloaded files next to `DeSmuME.exe`. If you don't already have DeSmuME, then extract to the location you wish `DeSmuME.exe` to be located and DeSmuMAR will give you the option to download the latest nightly release.
 
-  [.NET Core 3.1 Runtime]: <https://dotnet.microsoft.com/download/dotnet/3.1>
+  [.NET 6.0 Runtime]: <https://dotnet.microsoft.com/download/dotnet/6.0>
   [DeSmuME]: <https://desmume.org/download>
   [Latest Release]: <https://github.com/rlaphoenix/DeSmuMAR/releases/latest/download/DeSmuMAR.zip>
 
