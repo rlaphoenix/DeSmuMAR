@@ -5,7 +5,7 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <StartupObject>DeSmuMAR.Program</StartupObject>
     <ApplicationIcon>DeSmuME.ico</ApplicationIcon>
-    <Copyright>© rlaPHOENiX 2020</Copyright>
+    <Copyright>© rlaPHOENiX 2020-2023</Copyright>
     <Description>An automated aspect ratio based resizing method for DeSmuME for playing in specific Aspect Ratio's.</Description>
     <PackageId>DeSmuMAR</PackageId>
     <Authors>rlaPHOENiX</Authors>
