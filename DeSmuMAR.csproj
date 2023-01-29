@@ -14,7 +14,7 @@
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
     <PackageProjectUrl>https://github.com/rlaphoenix/DeSmuMAR</PackageProjectUrl>
     <PackageIcon></PackageIcon>
-    <RepositoryType>GitHub</RepositoryType>
+    <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/rlaphoenix/DeSmuMAR</RepositoryUrl>
     <PackageTags>emulator, nintendo, emulation, nintendo-ds, desmume</PackageTags>
     <PackageReleaseNotes># 1.7.0 Hello .NET Core
