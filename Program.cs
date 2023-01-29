@@ -3,12 +3,9 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Net;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using static DeSmuMAR.Native;
 
 namespace DeSmuMAR
@@ -27,23 +24,10 @@ namespace DeSmuMAR
             // Ensure DeSmuME is available
             if (!File.Exists(DesmumeLocation))
             {
-                Log("There's no \"DeSmuME.exe\" next to DeSmuMAR, want to automatically download the latest Dev build? (y/n)");
-                if (Console.ReadKey().Key != ConsoleKey.Y)
-                {
-                    Log(
-                        "Alright, feel free to download it yourself. Make sure it's a recent Dev build (not stable!) " +
-                        "due to some features and abilities being missing in the stable builds. If you want a really " +
-                        "nice experience with different aspect ratio's, then take my warning!"
-                    );
-                    return;
-                }
-                Log("Downloading...");
-                if (!DownloadDesmumeDev(DesmumeLocation))
-                {
-                    Log("Failed to download DeSmuME, closing DeSmuMAR...", LogTypes.Error);
-                    return;
-                }
-                Log("Downloaded DeSmuME and placed it to \"" + DesmumeLocation + "\".");
+                Log("The \"DeSmuME.exe\" executable was not found. Please move DeSmuMAR's files next to DeSmuME's files.");
+                Log("DeSmuME must be v0.9.12 or newer. Make sure the file is named exactly DeSmuME.exe and not DeSmuME_0.9.11_x64.exe or such.");
+                _ = Console.ReadKey().Key;
+                return;
             }
             // Get active screen information
             const int ENUM_CURRENT_SETTINGS = -1;
@@ -73,63 +57,6 @@ namespace DeSmuMAR
             });
             // Run DeSmuME with the first argument provided to DeSmuMAR (if available, this should be the ROM path)
             RunDesmume(args.Length > 0 ? "\"" + args[0] + "\"" : null);
-        }
-
-        private static bool DownloadDesmumeDev(string savePath)
-        {
-            Log("Fetching API Data of AppVeyor: zeromus/desmume");
-            WebClient session = new WebClient { Headers = { { "Accept", "application/json,*/*" } } };
-            string appveyorRes;
-            JObject appveyor;
-            try
-            {
-                appveyorRes = session.DownloadString("https://ci.appveyor.com/api/projects/zeromus/desmume");
-            }
-            catch (WebException e)
-            {
-                Log(" - Failed! A Web Exception occured: " + e.Message, LogTypes.Error);
-                return false;
-            }
-            if (string.IsNullOrEmpty(appveyorRes))
-            {
-                Log(" - Failed! The response from AppVeyor was empty.", LogTypes.Error);
-                return false;
-            }
-            try
-            {
-                appveyor = JObject.Parse(appveyorRes);
-            }
-            catch (JsonReaderException)
-            {
-                Log(" - Failed! The response from AppVeyor is not valid JSON syntax.", LogTypes.Error);
-                return false;
-            }
-            Log(" + Obtained");
-
-            string latestJobId = (string)appveyor.SelectToken("build.jobs[0].jobId");
-            if (string.IsNullOrEmpty(latestJobId))
-            {
-                Log(" - Job ID was not found.", LogTypes.Error);
-                return false;
-            }
-            Log(" + Job ID " + latestJobId + " discovered");
-
-            Log("Downloading DeSmuME-VS2019-x64-Release.exe Job Artifact...");
-            try
-            {
-                session.DownloadFile(
-                    // TODO: Is there an appveyor API that could be used to more gracefully obtain this path?
-                    "https://ci.appveyor.com/api/buildjobs/" + latestJobId + "/artifacts/desmume/src/frontend/windows/__bins/DeSmuME-VS2019-x64-Release.exe",
-                    savePath
-                );
-            }
-            catch (WebException e)
-            {
-                Log(" - Failed! A Web Exception occured: " + e.Message, LogTypes.Error);
-                return false;
-            }
-
-            return true;
         }
 
         private static Process RunDesmume(string Argument = null)
