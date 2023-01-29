@@ -4,25 +4,20 @@
 
 DeSmuME Aspect Ratio is an automated aspect ratio based resizing method for DeSmuME for playing in specific Aspect Ratio's.
 
+Supports DeSmuME v0.9.12+. May support v0.9.11 if compiled around 2020 onwards, and not the original 2015 release.
+
 ## Installation
 
-Notes:
-
-1. `DeSmuMAR.exe` must always be next to `DeSmuME.exe`.
-2. DeSmuMAR gives you the option to install a required nightly version automatically if not found. See Installation steps below.
-
-### Requirements
-
-- [.NET 6.0 Runtime]
-- [DeSmuME] Nightly. v0.9.11 and older is unsupported. The download page has recommendations for each OS.
-
-### Setup
-
-1. Download the [Latest Release] and extract the downloaded files next to `DeSmuME.exe`. If you don't already have DeSmuME, then extract to the location you wish `DeSmuME.exe` to be located and DeSmuMAR will give you the option to download the latest nightly release.
-
+1. Download and install the [.NET 6.0 Runtime] if not yet installed.
+2. Download [DeSmuME] v0.9.12 or newer and extract the zip files.
+   (If the exe filename is e.g., `DeSmuME_0.9.13_x64.exe`, rename it to `DeSmuME.exe`)
+3. Download [DeSmuMAR] and extract the files into the same folder as DeSmuME.
+4. Check and verify that `DeSmuME.exe` and it's files are next to `DeSmuME.exe` and it's files.
+   (Make sure DeSmuMAR's files are not in e.g., /DeSmuME/DeSmuMAR/DeSmuMAR.exe or such)
+   
   [.NET 6.0 Runtime]: <https://dotnet.microsoft.com/download/dotnet/6.0>
   [DeSmuME]: <https://desmume.org/download>
-  [Latest Release]: <https://github.com/rlaphoenix/DeSmuMAR/releases/latest/download/DeSmuMAR.zip>
+  [DeSmuMAR]: <https://github.com/rlaphoenix/DeSmuMAR/releases/latest/download/DeSmuMAR.zip>
 
 ## Usage
 
