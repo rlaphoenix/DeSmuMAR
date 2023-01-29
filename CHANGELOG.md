@@ -1,3 +1,11 @@
+# 1.8.0 Nighty-night Nightlys :(
+
+- Migrate from .NET Core 3.1 to .NET 6.0 (LTS).
+- Due to (new?) AppVeyor restrictions of 1024 MB/day bandwidth on Artifact downloads, the auto download feature had to be removed.
+- Removed the dependency on Newtonsoft.Json, no longer required after removing the auto-download.
+- Installation instructions have been completely rewritten to make it much more clear.
+- Mateo Carriqui (system32uwu) for taking the time to fix a small width and height safety check mistake. (#5, #6)
+
 # 1.7.0 Hello .NET Core
 
 - Migrate from .NET Framework v4.8 to .NET Core 3.1.
