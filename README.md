@@ -12,8 +12,6 @@ Supports DeSmuME v0.9.12+. May support v0.9.11 if compiled around 2020 onwards, 
 2. Download [DeSmuME] v0.9.12 or newer and extract the zip files.
    (If the exe filename is e.g., `DeSmuME_0.9.13_x64.exe`, rename it to `DeSmuME.exe`)
 3. Download [DeSmuMAR] and extract the files into the same folder as DeSmuME.
-4. Check and verify that `DeSmuME.exe` and it's files are next to `DeSmuME.exe` and it's files.
-   (Make sure DeSmuMAR's files are not in e.g., /DeSmuME/DeSmuMAR/DeSmuMAR.exe or such)
    
   [.NET 6.0 Runtime]: <https://dotnet.microsoft.com/download/dotnet/6.0>
   [DeSmuME]: <https://desmume.org/download>
